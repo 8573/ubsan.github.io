@@ -4,12 +4,29 @@ title: About
 permalink: /about/
 ---
 
-Some information about you!
+Hi! My name is Nicole Mazzuca, and I'm a Rust fanatic, language lawyer, and
+member of the unsafe guidelines team. You can almost always find me on irc at
+`ubsan`. I use an interesting style of Rust where things are indented by two
+spaces, not four, and things aren't done in "axe" style, but are instead
+indented twice to continue lines:
 
-### More Information
+```rust
+// not this
+fn foo_with_long_name(long_param_name: LongTypeName,
+                      long_param_name_two: LongTypeNameTwo) 
+                      -> LongTypeNameTheThird {
+    do_things();
+}
 
-A place to include any other types of information that you'd like to include about yourself.
+// but this
+fn foo_with_long_name(long_param_name: LongTypeName,
+    long_param_name_two: LongTypeNameTwo) -> LongTypeNameTheThird {
+  do_things();
+}
+```
+
+and generally think everone should do the same :)
 
 ### Contact me
 
-[email@domain.com](mailto:email@domain.com)
+[Email me!](mailto:npmazzuca@gmail.com)
