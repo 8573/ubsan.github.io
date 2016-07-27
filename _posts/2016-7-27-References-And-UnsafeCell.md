@@ -81,8 +81,8 @@ fn foo(ptr1: &mut u32, ptr2: &u32) {
 struct Bar { x: u32, y: u32 };
 let mut bar = Bar { x: 0, y: 1 };
 foo(&mut bar.x, &bar.y); // totally fine! bar.x and bar.y are disjoint lvalues
-foo(&mut *(&mut bar.x as *mut _), &bar.x); // undefined behavior, because bar.x is
-                                           // aliased to itself
+foo(&mut *(&mut bar.x as *mut _), &bar.x); // undefined behavior, because bar.x
+                                           // is aliased to itself
 // (the &mut *(... as *mut _) is to get around the borrow checker)
 
 // This is a similar example; if ptr1 is aliased to ptr2.x, it's UB
@@ -92,12 +92,13 @@ fn baz(ptr1: &mut u32, ptr2: &Bar) {
 
 let mut bar = Bar { x: 0, y: 1 };
 baz(&mut 0, &bar); // fine, they're not aliased ("disjoint")
-baz(&mut *(&mut bar.x as *mut _), &bar); // UB, you write through ptr1, and they're
-                                         // aliased as above
-baz(&mut *(&mut bar.y as *mut _), &bar); // not UB in my opinion, although definitely
-                                         // not open-and-shut. this is a read from
-                                         // bar.x, and a write through bar.y, which
-                                         // *shouldn't* be UB, but no promises
+baz(&mut *(&mut bar.x as *mut _), &bar); // UB, you write through ptr1, and 
+                                         // they're aliased as above
+baz(&mut *(&mut bar.y as *mut _), &bar); // not UB in my opinion, although 
+                                         // definitely not open-and-shut. this
+                                         // is a read from bar.x, and a write
+                                         // through bar.y, which *shouldn't* be
+                                         // UB, but no promises
 ```
 
 Of course, there are also rules about reborrows; if you mutably reborrow a
