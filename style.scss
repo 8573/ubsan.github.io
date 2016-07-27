@@ -123,11 +123,11 @@ img {
 // Specify the color of the selection
 ::-moz-selection {
   color: $black;
-  background: $gray;
+  background: #e6e6e6;
 }
 ::selection {
   color: $black;
-  background: $gray;
+  background: #e6e6e6;
 }
 
 // Nicolas Gallagher's micro clearfix hack
