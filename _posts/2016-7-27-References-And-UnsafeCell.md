@@ -40,7 +40,7 @@ First of all, let's look at `&` and `&mut` by themselves.
 # References
 
 `&T` and `&mut T` are two of the most important types in Rust, perhaps the most
-important types. They are similar to `T*` and `T const*` in C, but with a few
+important types. They are similar to `T const*` and `T*` in C, but with a few
 extra guarantees; most importantly for today, there shall be no aliasing writes.
 
 If you look at the [nomicon][nomicon-alias], aliasing is defined in an...
@@ -76,7 +76,7 @@ let y = &f.y; // y points to just the "y" part of foo,
 
 One important thing to see is that `x` and `y` are disjoint; they don't point at
 the same lvalue. `f` covers both `x` and `y`; it points to an lvalue which holds
-both `x` and `y`.
+both `x` and `y`; it aliases both `x` and `y`.
 
 ```
 |   f   |
@@ -86,19 +86,22 @@ both `x` and `y`.
 So, pointers are *really* handles to lvalues; and you aren't allowed to alias
 writes with references. What does this really mean?  It means that if you have
 any type of pointer (`*const T`, `*mut T`, `&T`, `&mut T`, `Box<T>`, etc.), and
-a reference (`&T`, `&mut T`), which alias (with the definition of aliasing seen
-above), you can't write to the aliased lvalue through one of the pointers,
-and read the changed lvalue through the other pointer.
+a reference (`&T`, `&mut T`), which alias (they point to the same lvalue, *or*
+one points to a sub-lvalue of the other), you can't write to the aliased lvalue
+through one of the pointers, and read the changed lvalue through the other
+pointer.
 
 ## Examples
 
 ```rust
 // This is an example of a write through a pointer, and a read through the
 // other.
-// You may not alias ptr1 and ptr2, because you're writing through ptr1, and one
-// of these is a reference (technically, both of them are)
-fn foo(ptr1: &mut u32, ptr2: &u32) {
+// You may not alias ptr1 and ptr2, because you're writing through ptr1, then
+// reading through ptr2, and one of these is a reference (technically, both of
+// them are)
+fn foo(ptr1: &mut u32, ptr2: &u32) -> u32 {
   *ptr1 = *ptr2 + 5;
+  *ptr2
 }
 
 struct Bar { x: u32, y: u32 };
@@ -109,8 +112,9 @@ foo(&mut *(&mut bar.x as *mut _), &bar.x); // undefined behavior, because bar.x
 // (the &mut *(... as *mut _) is to get around the borrow checker)
 
 // This is a similar example; if ptr1 is aliased to ptr2.x, it's UB
-fn baz(ptr1: &mut u32, ptr2: &Bar) {
-  *ptr1 = ptr2.x;
+fn baz(ptr1: &mut u32, ptr2: &Bar) -> u32 {
+  *ptr1 = 0;
+  ptr2.x
 }
 
 let mut bar = Bar { x: 0, y: 1 };
@@ -124,6 +128,17 @@ baz(&mut *(&mut bar.y as *mut _), &bar); // not UB in my opinion, although
                                          // UB, but no promises
 // of course, if you delete the function calls, then it's totally not UB
 // UB follows use.
+
+// and finally, with sub-lvalues
+// if ptr2 points to *either* ptr1.x or ptr1.y, then it's UB
+// because they're "aliased"
+fn buzz(ptr1: &mut Bar, ptr2: &u32) -> u32 {
+  *ptr1 = Bar { x: 0, y: 0 };
+  *ptr2
+}
+let mut bar = Bar { x: 0, y: 1 };
+buzz(&mut bar, &0); // fine
+buzz(&mut *(&mut bar as *mut _), &bar.x); // not fine
 ```
 
 There are also rules about reborrows: if you mutably reborrow a pointer, then
