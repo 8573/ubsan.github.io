@@ -54,9 +54,9 @@ many ways to get a block of memory like this; these are two common ones:
 
 ```rust
 fn main() {
-  let x: u32 = 0; // on x86_64, x is an lvalue with size 4, alignment 4
-  let y = Box::new(x); // on x86_64, y is an lvalue with size 8, alignment 8
-                       // while *y is an lvalue with size 4, alignment 4
+    let x: u32 = 0; // on x86_64, x is an lvalue with size 4, alignment 4
+    let y = Box::new(x); // on x86_64, y is an lvalue with size 8, alignment 8
+                         // while *y is an lvalue with size 4, alignment 4
 }
 ```
 
@@ -100,8 +100,8 @@ pointer.
 // reading through ptr2, and one of these is a reference (technically, both of
 // them are)
 fn foo(ptr1: &mut u32, ptr2: &u32) -> u32 {
-  *ptr1 = *ptr2 + 5;
-  *ptr2
+    *ptr1 = *ptr2 + 5;
+    *ptr2
 }
 
 struct Bar { x: u32, y: u32 };
@@ -113,8 +113,8 @@ foo(&mut *(&mut bar.x as *mut _), &bar.x); // undefined behavior, because bar.x
 
 // This is a similar example; if ptr1 is aliased to ptr2.x, it's UB
 fn baz(ptr1: &mut u32, ptr2: &Bar) -> u32 {
-  *ptr1 = 0;
-  ptr2.x
+    *ptr1 = 0;
+    ptr2.x
 }
 
 let mut bar = Bar { x: 0, y: 1 };
@@ -133,8 +133,8 @@ baz(&mut *(&mut bar.y as *mut _), &bar); // not UB in my opinion, although
 // if ptr2 points to *either* ptr1.x or ptr1.y, then it's UB
 // because they're "aliased"
 fn buzz(ptr1: &mut Bar, ptr2: &u32) -> u32 {
-  *ptr1 = Bar { x: 0, y: 0 };
-  *ptr2
+    *ptr1 = Bar { x: 0, y: 0 };
+    *ptr2
 }
 let mut bar = Bar { x: 0, y: 1 };
 buzz(&mut bar, &0); // fine
@@ -149,22 +149,22 @@ in more detail.
 ```rust
 let original_ref = &mut 0;
 {
-  let mutably_reborrowed = &mut *original_ref;
-  *mutably_reborrowed = 1;
+    let mutably_reborrowed = &mut *original_ref;
+    *mutably_reborrowed = 1;
 }
 println!("{}", *original_ref); // 1
 {
-  let raw_pointer: *mut _ = original_ref;
-  unsafe { *raw_pointer = 2; }
+    let raw_pointer: *mut _ = original_ref;
+    unsafe { *raw_pointer = 2; }
 }
 println!("{}", *original_ref); // 2
 {
-  let raw_pointer: *mut _ = original_ref;
-  let ref_from_raw = unsafe { &mut *raw_pointer };
-  *ref_from_raw = 3;
-  println!("{}", *raw_pointer); // 3
-  // can't write to ref_from_raw after this point, because you've read from
-  // raw_pointer now
+    let raw_pointer: *mut _ = original_ref;
+    let ref_from_raw = unsafe { &mut *raw_pointer };
+    *ref_from_raw = 3;
+    println!("{}", *raw_pointer); // 3
+    // can't write to ref_from_raw after this point, because you've read from
+    // raw_pointer now
 }
 println!("{}", *original_ref); // 3
 // can't write to either, because you've read from original_ref
@@ -184,8 +184,8 @@ when it comes to aliasing.
 
 ```rust
 unsafe fn foo(x: &UnsafeCell<u32>, y: *mut u32) {
-  *x.get() = *y + 3;
-  println!("{}", *x.get() + *y);
+    *x.get() = *y + 3;
+    println!("{}", *x.get() + *y);
 } // Rust is not allowed to assume that x and y do not alias, and therefore,
   // this is well defined even if x and y point to the same lvalue.
 ```
@@ -197,8 +197,8 @@ Let's look at it another way:
 
 ```rust
 struct Foo {
-  x: u32,
-  y: UnsafeCell<u32>,
+    x: u32,
+    y: UnsafeCell<u32>,
 }
 
 let foo = Foo { x: 3, y: UnsafeCell::new(1) };
